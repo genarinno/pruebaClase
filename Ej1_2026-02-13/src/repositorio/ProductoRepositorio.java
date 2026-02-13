@@ -26,10 +26,12 @@ public class ProductoRepositorio extends BaseDatos implements ICrud<Integer, Pro
 	{
 		ProductoModelo productoModelo;
 		
+		conectar();
+		
 		sql = """
 				SELECT IDPRODUCTO, NOMBRE, PRECIO, STOCK 
 				FROM PRODUCTO
-				WHERE IDPRODUCTO = ?;		
+				WHERE IDPRODUCTO = ?	
 			  """;
 		ps = conexion.prepareStatement(sql);
 		ps.setInt(1, id);
@@ -51,6 +53,8 @@ public class ProductoRepositorio extends BaseDatos implements ICrud<Integer, Pro
 			productoModelo = null;
 		}
 		
+		desconectar();
+		
 		return productoModelo;
 	}
 
@@ -59,6 +63,8 @@ public class ProductoRepositorio extends BaseDatos implements ICrud<Integer, Pro
 	{
 		ArrayList<ProductoModelo> productos = new ArrayList<ProductoModelo>();
 		ProductoModelo modelo;
+		
+		conectar();
 		
 		sql = """
 				SELECT IDPRODUCTO, NOMBRE, PRECIO, STOCK 
@@ -80,11 +86,13 @@ public class ProductoRepositorio extends BaseDatos implements ICrud<Integer, Pro
 			productos.add(modelo);
 		}
 		
+		desconectar();
+		
 		return productos;
 	}
 
 	@Override
-	public boolean nuevo(ProductoModelo modelo) throws SQLException 
+	public boolean nuevo(ProductoModelo modelo) throws SQLException, ClassNotFoundException 
 	{
 		
 		boolean ok;
@@ -92,6 +100,8 @@ public class ProductoRepositorio extends BaseDatos implements ICrud<Integer, Pro
 			  "VALUES(?, ?, ?, ?)";
 		//            1  2  3  4
 		
+		
+		conectar();
 		
 		ps = conexion.prepareStatement(sql);
 		
@@ -111,6 +121,8 @@ public class ProductoRepositorio extends BaseDatos implements ICrud<Integer, Pro
 			ok = false;
 		}
 		
+		desconectar();
+		
 		return ok;
 	}
 
@@ -120,6 +132,7 @@ public class ProductoRepositorio extends BaseDatos implements ICrud<Integer, Pro
 		
 		boolean ok;
 		
+		conectar();
 		sql = """
 		        UPDATE PRODUCTO
 		        SET IDPRODUCTO = ?, NOMBRE = ?, PRECIO = ?, STOCK = ?
@@ -147,27 +160,46 @@ public class ProductoRepositorio extends BaseDatos implements ICrud<Integer, Pro
 			ok = false;
 		}
 		
+		desconectar();
 		return ok;
 	}
 
 	@Override
 	public boolean eliminar(Integer id) throws Exception 
 	{
+		boolean ok;
 		
 		sql = """
 			     DELETE FROM PRODUCTO
 				 WHERE IDPRODUCTO = ?
 			  """;
+		
+		conectar();
+		
 		ps= conexion.prepareStatement(sql);
 		ps.setInt(1, id);
 		
-		return ps.executeUpdate() == 1; //Hemos simplificado el codigo de "editar()" [Nos quitamos ok]
+		
+		cantidad = ps.executeUpdate();
+		ok = cantidad == 1;
+		
+		desconectar();
+		
+		return ok; //Hemos simplificado el codigo de "editar()" [Nos quitamos ok]
 	}
 
 	@Override
 	public boolean eliminarModelo(ProductoModelo modelo) throws Exception 
 	{
-		return eliminar(modelo.getIdProducto());
+		boolean ok;
+		
+		conectar();
+		
+		ok = eliminar(modelo.getIdProducto());
+		
+		desconectar();
+		
+		return ok;
 	}
 
 	/*
